@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }} · TaskMate{% endblock %}
+{% block content %}
+<div class="form-card mx-auto">
+    <a class="back-link" href="{% url 'dashboard' %}">← Back to dashboard</a>
+    <h1 class="h2 fw-bold mt-3">{{ page_title }}</h1>
+    <p class="text-muted mb-4">Keep it clear, choose a priority, and set a deadline if needed.</p>
+    <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="mb-3">
+                <label class="form-label fw-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% for error in field.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+            </div>
+        {% endfor %}
+        <div class="d-flex gap-2 mt-4">
+            <button class="btn btn-primary flex-grow-1" type="submit">Save task</button>
+            <a class="btn btn-light" href="{% url 'dashboard' %}">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

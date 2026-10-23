@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · TaskMate{% endblock %}
+{% block content %}
+<section class="hero d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <p class="eyebrow mb-2">YOUR PERSONAL WORKSPACE</p>
+        <h1 class="display-6 fw-bold mb-2">Make today count.</h1>
+        <p class="text-muted mb-0">Plan your tasks, stay focused, and celebrate progress.</p>
+    </div>
+    <a class="btn btn-primary btn-lg" href="{% url 'task_create' %}">＋ Add a task</a>
+</section>
+<div class="row g-3 mb-4">
+    <div class="col-12 col-sm-4"><div class="stat-card"><span class="stat-label">All tasks</span><div class="stat-number">{{ total_count }}</div><span class="stat-caption">Everything on your list</span></div></div>
+    <div class="col-12 col-sm-4"><div class="stat-card"><span class="stat-label">Pending</span><div class="stat-number">{{ pending_count }}</div><span class="stat-caption">Ready for your focus</span></div></div>
+    <div class="col-12 col-sm-4"><div class="stat-card"><span class="stat-label">Completed</span><div class="stat-number">{{ completed_count }}</div><span class="stat-caption">Progress you've made</span></div></div>
+</div>
+<div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-3">
+    <h2 class="h4 fw-bold mb-0">Your tasks</h2>
+    <div class="filter-pills">
+        <a class="{% if not current_status %}active{% endif %}" href="{% url 'dashboard' %}">All</a>
+        <a class="{% if current_status == 'Pending' %}active{% endif %}" href="?status=Pending">Pending</a>
+        <a class="{% if current_status == 'Completed' %}active{% endif %}" href="?status=Completed">Completed</a>
+    </div>
+</div>
+{% if tasks %}
+<div class="row g-3">
+    {% for task in tasks %}
+    <div class="col-12 col-lg-6">
+        <article class="task-card {% if task.status == 'Completed' %}task-done{% endif %}">
+            <div class="d-flex justify-content-between gap-3">
+                <div class="min-w-0">
+                    <div class="d-flex flex-wrap gap-2 mb-2">
+                        <span class="priority priority-{{ task.priority|lower }}">{{ task.priority }} priority</span>
+                        <span class="status-pill">{% if task.status == 'Completed' %}Completed{% else %}Pending{% endif %}</span>
+                    </div>
+                    <h3 class="h5 fw-bold task-title">{{ task.title }}</h3>
+                </div>
+                <span class="task-check">{% if task.status == 'Completed' %}✓{% else %}○{% endif %}</span>
+            </div>
+            {% if task.description %}<p class="text-muted task-description">{{ task.description|linebreaksbr }}</p>{% endif %}
+            <div class="task-footer">
+                <span class="small text-muted">{% if task.due_date %}Due {{ task.due_date|date:"M d, Y" }}{% else %}No deadline{% endif %}</span>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a class="btn btn-sm btn-light" href="{% url 'task_edit' task.pk %}">Edit</a>
+                    <form method="post" action="{% url 'task_toggle' task.pk %}">{% csrf_token %}<button class="btn btn-sm btn-outline-success" type="submit">{% if task.status == 'Completed' %}Reopen{% else %}Complete{% endif %}</button></form>
+                    <form method="post" action="{% url 'task_delete' task.pk %}" onsubmit="return confirm('Delete this task?');">{% csrf_token %}<button class="btn btn-sm btn-outline-danger" type="submit">Delete</button></form>
+                </div>
+            </div>
+        </article>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state text-center py-5">
+    <div class="empty-icon">✦</div>
+    <h3 class="h4 fw-bold mt-3">Nothing on your list yet</h3>
+    <p class="text-muted">Add your first task and make a little progress today.</p>
+    <a class="btn btn-primary" href="{% url 'task_create' %}">Create your first task</a>
+</div>
+{% endif %}
+{% endblock %}
